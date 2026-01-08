@@ -19,6 +19,7 @@
       --pending: #616161;
       --accent-color: #ff8f00;
       --header-bg: #1a0033;
+      --success-glow: rgba(0, 200, 83, 0.2);
     }
 
     [data-theme="light"] {
@@ -41,53 +42,71 @@
       min-height: 100vh;
     }
 
-    @media screen and (display-mode: picture-in-picture) {
-      body {
-        background: var(--bg-color) !important;
-        padding: 5px !important;
-      }
-
-      .container {
-        padding: 10px !important;
-        width: 100% !important;
-        border: none !important;
-        box-shadow: none !important;
-      }
-
-      h1,
-      .response-history,
-      .footer,
-      .header {
-        display: none !important;
-      }
-
-      .badge {
-        width: 26px !important;
-        height: 26px !important;
-        font-size: 0.8em !important;
-      }
-
-      button {
-        padding: 8px !important;
-        font-size: 0.85em !important;
-      }
-
-      #respostas {
-        margin: 5px 0 !important;
-        gap: 4px !important;
-      }
-    }
-
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       background: linear-gradient(135deg, var(--header-bg) 0%, #3a0075 100%);
-      padding: 15px 25px;
+      padding: 18px 20px;
       color: white;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
       border-bottom: 2px solid var(--accent-color);
       flex-shrink: 0;
+      gap: 10px;
+    }
+
+    .header-left,
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-header {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      padding: 6px 12px;
+      font-size: 0.9em;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-header:hover {
+      background: var(--accent-color);
+      border-color: var(--accent-color);
+      transform: translateY(-2px);
+    }
+
+    .btn-pause.active {
+      background: var(--error) !important;
+      border-color: var(--error);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.7;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    #tempo {
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: bold;
+      font-size: 1.1em;
+      min-width: 80px;
     }
 
     .main-content {
@@ -109,6 +128,22 @@
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.1);
       box-sizing: border-box;
+      transition: all 0.5s ease;
+    }
+
+    .setup-obs {
+      font-size: 0.85em;
+      margin-bottom: 15px;
+      opacity: 0.8;
+      font-style: italic;
+    }
+
+    [data-theme="light"] .setup-obs {
+      color: #555;
+    }
+
+    [data-theme="dark"] .setup-obs {
+      color: var(--accent-color);
     }
 
     #respostas,
@@ -127,6 +162,11 @@
       margin: 20px 0;
     }
 
+    .controles.pausado {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
     input,
     button {
       padding: 12px 20px;
@@ -140,35 +180,48 @@
     input {
       background: rgba(255, 255, 255, 0.1);
       color: var(--text-color);
-      border: 2px solid rgba(0, 0, 0, 0.349);
+      border: 2px solid rgba(0, 0, 0, 0.2);
       width: 180px;
       text-align: center;
-    }
-
-    button {
-      cursor: pointer;
+      margin: 5px;
     }
 
     .btn-start {
       background: var(--accent-color);
       color: white;
+      cursor: pointer;
+    }
+
+    .btn-menu {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--accent-color);
+      color: white;
+      margin-top: 10px;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .btn-menu:hover {
+      background: rgba(255, 255, 255, 0.2);
     }
 
     .btn-correct {
       background: var(--correct);
       color: white;
       flex: 1;
+      cursor: pointer;
     }
 
     .btn-error {
       background: var(--error);
       color: white;
       flex: 1;
+      cursor: pointer;
     }
 
     .badge {
-      width: 35px;
-      height: 35px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -191,6 +244,14 @@
       color: #ccc;
     }
 
+    #numQuestaoAtual {
+      font-size: 1.5em;
+      font-weight: 700;
+      color: var(--accent-color);
+      margin: 10px 0;
+      display: block;
+    }
+
     #blur-overlay {
       position: fixed;
       top: 0;
@@ -204,8 +265,7 @@
     }
 
     #telaExito,
-    #overlayConteudo,
-    #overlayPausa {
+    #overlayConteudo {
       position: fixed;
       top: 50%;
       left: 50%;
@@ -227,63 +287,74 @@
       flex-shrink: 0;
       text-align: center;
       padding: 15px;
-      font-size: 19px;
+      font-size: 0.9em;
       background: var(--header-bg);
       color: white;
       border-top: 1px solid var(--accent-color);
     }
 
-    .response-history {
-      display: none;
+    .nivelado-sucesso {
+      border: 3px solid var(--correct) !important;
+      box-shadow: 0 0 30px var(--success-glow) !important;
     }
 
-    #aproveitamentoTotal {
-      font-weight: 800;
-      color: #00e5ff;
-      font-size: 1.1em;
-      margin-top: 5px;
-    }
+    @media screen and (display-mode: picture-in-picture) {
 
-    .pip-success-bg {
-      background-color: var(--correct) !important;
-      color: white !important;
+      .header,
+      .footer,
+      .setup-obs,
+      h1 {
+        display: none !important;
+      }
+
+      .container {
+        padding: 10px !important;
+        width: 100% !important;
+      }
     }
   </style>
 </head>
 
 <body data-theme="light">
   <div class="header">
-    <div style="display: flex; align-items: center; gap: 8px;">
+    <div class="header-left">
       <img src="https://fenixconcursosmilitares.com.br/public/assets/images/relogio.png" width="25">
-      <span><strong id="tempo">00:00:00</strong></span>
-      <button id="btnPausaManual" class="btn-start"
-        style="padding: 2px 8px; font-size: 0.7em; margin-left: 5px; display: none;">⏸ Pausar</button>
+      <span id="tempo">00:00:00</span>
+      <button id="btnPausa" class="btn-header btn-pause" title="Pausar/Retomar">⏸</button>
+      <button id="btnReiniciarHeader" class="btn-header" title="Zerar Progresso">↻</button>
+      <button id="btnVoltarMenuHeader" class="btn-header" title="Voltar ao Menu">⬅</button>
     </div>
-    <div style="display: flex; gap: 8px;">
-      <button id="btnFlutuar" class="btn-start" style="padding: 5px 12px; font-size: 0.8em;">🗗 Flutuar</button>
-      <button id="btnToggleTheme" class="btn-start" style="padding: 5px 12px;">☾</button>
+    <div class="header-right">
+      <button id="btnFlutuar" class="btn-header">🗗 Flutuar</button>
+      <button id="btnToggleTheme" class="btn-header">☾</button>
     </div>
   </div>
 
   <div class="main-content">
     <div class="container" id="mainContainer">
       <h1 id="tituloNivelamento">Nivelamento</h1>
+
       <div id="setup">
-        <input type="text" id="inputNivelamento" placeholder="Ex: 4/5" />
+        <p class="setup-obs">Dica: Informe o número da primeira questão do banco.</p>
+        <input type="text" id="inputNivelamento" placeholder="Meta (ex: 4/5)" />
+        <input type="number" id="inputQuestaoInicial" placeholder="Nº Inicial" />
         <br>
-        <button id="botaoIniciar" class="btn-start" style="margin-top: 15px;">Iniciar Nivelamento</button>
+        <button id="botaoIniciar" class="btn-start" style="margin-top: 15px; width: 200px;">Iniciar</button>
       </div>
+
       <div id="statusNivelamento" style="display: none;">
+        <span id="numQuestaoAtual">Questão: --</span>
         <p id="objetivo"></p>
         <div id="respostas"></div>
       </div>
+
       <div class="controles" id="painelControles">
         <button id="btnC" class="btn-correct">C (Acerto)</button>
         <button id="btnE" class="btn-error">E (Erro)</button>
       </div>
-      <div class="response-history">
-        <hr style="opacity: 0.2; margin: 20px 0;">
-        <h3>Histórico:</h3>
+
+      <div class="response-history" style="display:none;">
+        <hr style="opacity: 0.1; margin: 20px 0;">
         <div id="historico"></div>
       </div>
     </div>
@@ -291,28 +362,24 @@
 
   <div id="blur-overlay"></div>
   <div id="overlayConteudo">
-    <img src="https://fenixconcursosmilitares.com.br/public/assets/images/relogio.png" width="50">
     <div id="overlayTempo" style="font-size: 2em; margin: 10px 0; color: var(--accent-color);">00:00:00</div>
     <p>Você ERROU! Assista a resolução.</p>
     <button id="botaoProxima" class="btn-start" style="width: 100%;">Já vi a resolução</button>
-    <p style="margin-top: 15px; font-size: 0.9em; opacity: 0.8;">Tempo Corrigindo: <span
+    <p style="margin-top: 15px; font-size: 0.8em; opacity: 0.7;">Tempo Corrigindo: <span
         id="valTempoPausado">00:00:00</span></p>
   </div>
-  <div id="overlayPausa">
-    <h2 style="color: var(--accent-color);">ESTUDO PAUSADO</h2>
-    <p>O cronômetro está parado.</p>
-    <button id="btnRetomar" class="btn-start" style="width: 100%;">▶ Retomar Estudo</button>
-  </div>
+
   <div id="telaExito">
     <h2 style="color: var(--accent-color);">🔥 NIVELADO! 🔥</h2>
-    <div id="statsFinal" style="text-align: left; display: inline-block; margin: 15px 0;">
+    <div id="statsFinal" style="text-align: left; display: inline-block; margin: 15px 0; font-size: 0.9em;">
       <p id="tempoTotal"></p>
       <p id="totalQuestoes"></p>
       <p id="acertosErros"></p>
-      <p id="aproveitamentoTotal"></p>
+      <p id="aproveitamentoTotal" style="color: #00e5ff; font-weight: bold;"></p>
       <p id="totalPausa"></p>
     </div>
-    <button id="btnReiniciar" class="btn-start" style="width: 100%;">🔁 Novo Nivelamento</button>
+    <button id="btnReiniciar" class="btn-start" style="width: 100%;">🔁 Reiniciar Mesma Meta</button>
+    <button id="btnVoltarMenuFinal" class="btn-menu">⬅ Voltar ao Menu</button>
   </div>
 
   <audio id="somAcerto"
@@ -325,34 +392,58 @@
   </footer>
 
   <script>
-    let nivelA = 0, nivelB = 0, respostas = [], historico = [];
+    let nivelA = 0, nivelB = 0, questaoInicialSalva = 0, questaoAtual = 0, respostas = [], historico = [];
     let segundosTotais = 0, tempoPausado = 0;
-    let iniciado = false, pausadoParaResolucao = false, pausadoManual = false, nivelado = false;
+    let iniciado = false, pausadoParaResolucao = false, nivelado = false, pausadoManual = false;
     let cronometroGlobal = null;
 
-    // Solicitar permissão de notificação logo no início
-    if (Notification.permission !== "granted") Notification.requestPermission();
-
-    function isFloating() { return !!(window.documentPictureInPicture && window.documentPictureInPicture.window); }
-    function getCtx() { return isFloating() ? window.documentPictureInPicture.window.document : document; }
+    function getCtx() {
+      return (window.documentPictureInPicture && window.documentPictureInPicture.window)
+        ? window.documentPictureInPicture.window.document
+        : document;
+    }
 
     function vincularBotoes(doc) {
-      const clones = (id, func) => {
+      const setupClick = (id, func) => {
         const el = doc.getElementById(id);
-        if (el) {
-          const novoEl = el.cloneNode(true);
-          el.parentNode.replaceChild(novoEl, el);
-          novoEl.addEventListener("click", func);
-        }
+        if (el) el.onclick = func;
       };
-      clones("botaoIniciar", iniciarNivelamento);
-      clones("btnC", () => responder('C'));
-      clones("btnE", () => responder('E'));
-      clones("botaoProxima", fecharResolucao);
-      clones("btnReiniciar", reiniciar);
-      clones("btnFlutuar", togglePiP);
-      clones("btnPausaManual", alternarPausaManual);
-      clones("btnRetomar", alternarPausaManual);
+      setupClick("botaoIniciar", iniciarNivelamento);
+      setupClick("btnC", () => responder('C'));
+      setupClick("btnE", () => responder('E'));
+      setupClick("botaoProxima", fecharResolucao);
+      setupClick("btnReiniciar", reiniciarMesmoNivel);
+      setupClick("btnReiniciarHeader", reiniciarMesmoNivel);
+      setupClick("btnVoltarMenuHeader", () => window.location.reload());
+      setupClick("btnVoltarMenuFinal", () => window.location.reload());
+      setupClick("btnFlutuar", togglePiP);
+      setupClick("btnPausa", togglePausa);
+      setupClick("btnToggleTheme", alternarTema);
+    }
+
+    function alternarTema() {
+      const b = document.body;
+      const novoTema = b.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      b.setAttribute('data-theme', novoTema);
+      const btn = getCtx().getElementById('btnToggleTheme');
+      if (btn) btn.textContent = novoTema === 'dark' ? '☀︎' : '☾';
+    }
+
+    function togglePausa() {
+      if (!iniciado || nivelado) return;
+      pausadoManual = !pausadoManual;
+      const ctx = getCtx();
+      const btn = ctx.getElementById("btnPausa");
+      const painel = ctx.getElementById("painelControles");
+      if (pausadoManual) {
+        btn.textContent = "▶";
+        btn.classList.add("active");
+        if (painel) painel.classList.add("pausado");
+      } else {
+        btn.textContent = "⏸";
+        btn.classList.remove("active");
+        if (painel) painel.classList.remove("pausado");
+      }
     }
 
     function iniciarCronometroGlobal() {
@@ -368,58 +459,56 @@
     function atualizarDisplaysDeTempo() {
       const tF = formatarTempo(segundosTotais);
       const pF = formatarTempo(tempoPausado);
-      document.getElementById("tempo").textContent = tF;
       const ctx = getCtx();
-      if (ctx.getElementById("tempo")) ctx.getElementById("tempo").textContent = tF;
-      if (ctx.getElementById("overlayTempo")) ctx.getElementById("overlayTempo").textContent = tF;
-      if (ctx.getElementById("valTempoPausado")) ctx.getElementById("valTempoPausado").textContent = pF;
-    }
-
-    function alternarPausaManual() {
-      if (!iniciado || nivelado || pausadoParaResolucao) return;
-      pausadoManual = !pausadoManual;
-      const ctx = getCtx();
-      ctx.getElementById("blur-overlay").style.display = pausadoManual ? "block" : "none";
-      ctx.getElementById("overlayPausa").style.display = pausadoManual ? "block" : "none";
-      document.getElementById("btnPausaManual").textContent = pausadoManual ? "▶ Retomar" : "⏸ Pausar";
-    }
-
-    async function togglePiP() {
-      if (!window.documentPictureInPicture) return alert("PiP não suportado.");
-      if (window.documentPictureInPicture.window) { window.documentPictureInPicture.window.close(); return; }
-      const pipWin = await window.documentPictureInPicture.requestWindow({ width: 340, height: 400 });
-      const container = document.getElementById('mainContainer');
-      [...document.styleSheets].forEach(s => {
-        try {
-          const style = document.createElement('style');
-          style.textContent = [...s.cssRules].map(r => r.cssText).join('');
-          pipWin.document.head.appendChild(style);
-        } catch (e) { if (s.href) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = s.href; pipWin.document.head.appendChild(l); } }
+      const ids = ["tempo", "overlayTempo"];
+      ids.forEach(id => {
+        const el = ctx.getElementById(id);
+        if (el) el.textContent = tF;
+        const elRaiz = document.getElementById(id);
+        if (elRaiz) elRaiz.textContent = tF;
       });
-      pipWin.document.body.appendChild(container);
-      vincularBotoes(pipWin.document);
-      if (nivelado) aplicarVisaoSucesso(pipWin.document);
-      pipWin.addEventListener("pagehide", () => {
-        document.querySelector('.main-content').appendChild(container);
-        vincularBotoes(document);
-      });
+      const pEl = ctx.getElementById("valTempoPausado");
+      if (pEl) pEl.textContent = pF;
     }
 
     function iniciarNivelamento() {
       const ctx = getCtx();
-      const input = ctx.getElementById("inputNivelamento").value;
-      const match = input.match(/^(\d+)[\/\\](\d+)$/);
-      if (!match) return alert("Use o formato A/B.");
-      nivelA = parseInt(match[1]); nivelB = parseInt(match[2]);
+      const inputMeta = ctx.getElementById("inputNivelamento").value;
+      const inputInicio = ctx.getElementById("inputQuestaoInicial").value;
+      const match = inputMeta.match(/^(\d+)[\/\\](\d+)$/);
+      if (!match) return alert("Use o formato A/B (ex: 8/10).");
+
+      // Pedir permissão para notificações
+      if ("Notification" in window) {
+        Notification.requestPermission();
+      }
+
+      nivelA = parseInt(match[1]);
+      nivelB = parseInt(match[2]);
+      questaoInicialSalva = parseInt(inputInicio) || 1;
+      aplicarInicio();
+    }
+
+    function aplicarInicio() {
+      questaoAtual = questaoInicialSalva;
+      segundosTotais = 0; tempoPausado = 0;
+      respostas = Array(nivelB).fill("-");
+      historico = []; iniciado = true; nivelado = false; pausadoManual = false;
+
+      const ctx = getCtx();
       ctx.getElementById("setup").style.display = "none";
       ctx.getElementById("statusNivelamento").style.display = "block";
-      ctx.querySelector(".controles").style.display = "flex";
-      ctx.querySelector(".response-history").style.display = "block";
-      document.getElementById("btnPausaManual").style.display = "inline-block";
-      ctx.getElementById("objetivo").textContent = `Meta: ${nivelA} em ${nivelB}`;
-      respostas = Array(nivelB).fill("-");
+      ctx.getElementById("mainContainer").classList.remove("nivelado-sucesso");
+      ctx.getElementById("telaExito").style.display = "none";
+      ctx.getElementById("blur-overlay").style.display = "none";
+      ctx.getElementById("painelControles").style.display = "flex";
+      const histDiv = ctx.querySelector(".response-history");
+      if (histDiv) histDiv.style.display = "block";
+
+      atualizarTextoQuestao();
+      ctx.getElementById("objetivo").textContent = `Meta: ${nivelA} acertos em ${nivelB}`;
       renderRespostas();
-      iniciado = true;
+      renderHistorico();
       iniciarCronometroGlobal();
     }
 
@@ -429,12 +518,16 @@
       respostas.push(tipo);
       if (respostas.length > nivelB) respostas.shift();
       historico.push(tipo);
+      questaoAtual++;
+
+      atualizarTextoQuestao();
       renderRespostas();
       renderHistorico();
-      if (tipo === 'E') { pausarParaResolucao(); }
+
+      if (tipo === 'E') pausarParaResolucao();
       else {
-        if (pausadoParaResolucao && isFloating()) fecharResolucao();
-        if (respostas.filter(r => r === "C").length >= nivelA) exibirExito();
+        const acertosNaJanela = respostas.filter(r => r === "C").length;
+        if (acertosNaJanela >= nivelA) exibirExito();
       }
     }
 
@@ -454,67 +547,97 @@
 
     function exibirExito() {
       iniciado = false; nivelado = true;
-      document.getElementById("btnPausaManual").style.display = "none";
-
+      const doc = getCtx();
       const acertos = historico.filter(r => r === 'C').length;
       const total = historico.length;
-      const aprov = total > 0 ? ((acertos / total) * 100).toFixed(1) : 0;
+      const aprov = ((acertos / total) * 100).toFixed(1);
 
-      // Disparar Notificação do Navegador/Sistema
-      if (Notification.permission === "granted") {
+      // Notificação nativa do sistema
+      if ("Notification" in window && Notification.permission === "granted") {
         new Notification("🔥 NIVELADO!", {
-          body: `Meta Atingida! ${aprov}% em ${formatarTempo(segundosTotais)}`,
+          body: `Aproveitamento: ${aprov}% | Questões: ${total}`,
           icon: "https://fenixconcursosmilitares.com.br/public/assets/images/relogio.png"
         });
       }
 
-      if (isFloating()) {
-        const pipDoc = window.documentPictureInPicture.window.document;
-        pipDoc.body.classList.add("pip-success-bg");
-      }
-      aplicarVisaoSucesso(document);
-      document.getElementById('somAcerto').play();
-    }
-
-    function aplicarVisaoSucesso(doc) {
-      const acertos = historico.filter(r => r === 'C').length;
-      const total = historico.length;
-      const aprov = total > 0 ? ((acertos / total) * 100).toFixed(1) : 0;
+      // Atualiza os dados na tela (seja PiP ou Principal)
+      doc.getElementById("mainContainer").classList.add("nivelado-sucesso");
       doc.getElementById("tempoTotal").textContent = `⏱️ Estudo: ${formatarTempo(segundosTotais)}`;
       doc.getElementById("totalQuestoes").textContent = `📚 Questões: ${total}`;
       doc.getElementById("acertosErros").textContent = `✅ Acertos: ${acertos}`;
       doc.getElementById("aproveitamentoTotal").textContent = `📊 Aproveitamento: ${aprov}%`;
-      doc.getElementById("totalPausa").textContent = `⏸️ Correção: ${formatarTempo(tempoPausado)}`;
+      doc.getElementById("totalPausa").textContent = `Correção: ${formatarTempo(tempoPausado)}`;
+
       doc.getElementById("blur-overlay").style.display = "block";
       doc.getElementById("telaExito").style.display = "block";
-      doc.querySelector(".controles").style.display = "none";
-      doc.getElementById("statusNivelamento").style.display = "none";
+      doc.getElementById("painelControles").style.display = "none";
+
+      // Se estiver no PiP, garantir que a tela de êxito também apareça na página principal ao fechar
+      if (window.documentPictureInPicture && window.documentPictureInPicture.window) {
+        const mainDoc = document;
+        mainDoc.getElementById("blur-overlay").style.display = "block";
+        mainDoc.getElementById("telaExito").style.display = "block";
+      }
+    }
+
+    async function togglePiP() {
+      if (!window.documentPictureInPicture) return alert("PiP não suportado.");
+      if (window.documentPictureInPicture.window) { window.documentPictureInPicture.window.close(); return; }
+
+      const pipWin = await window.documentPictureInPicture.requestWindow({ width: 340, height: 450 });
+      const container = document.getElementById('mainContainer');
+
+      [...document.styleSheets].forEach(s => {
+        try {
+          const style = document.createElement('style');
+          style.textContent = [...s.cssRules].map(r => r.cssText).join('');
+          pipWin.document.head.appendChild(style);
+        } catch (e) { }
+      });
+
+      pipWin.document.body.appendChild(container);
+      vincularBotoes(pipWin.document);
+
+      pipWin.addEventListener("pagehide", () => {
+        document.querySelector('.main-content').appendChild(container);
+        vincularBotoes(document);
+
+        // Se nivelou no PiP, garante que ao voltar a tela de sucesso esteja visível
+        if (nivelado) {
+          document.getElementById("blur-overlay").style.display = "block";
+          document.getElementById("telaExito").style.display = "block";
+        }
+      });
+    }
+
+    function atualizarTextoQuestao() {
+      const el = getCtx().getElementById("numQuestaoAtual");
+      if (el) el.textContent = `Questão: ${questaoAtual}`;
     }
 
     function renderRespostas() {
-      const ctx = getCtx();
-      const container = ctx.getElementById("respostas");
+      const container = getCtx().getElementById("respostas");
       if (!container) return;
       container.innerHTML = "";
-      respostas.forEach(resp => {
-        const badge = document.createElement("div");
-        badge.className = `badge ${resp === "C" ? "correct" : resp === "E" ? "error" : "pending"}`;
-        badge.textContent = resp === "-" ? "" : resp;
-        container.appendChild(badge);
+      let offset = questaoAtual - respostas.length;
+      respostas.forEach((resp, i) => {
+        const b = document.createElement("div");
+        b.className = `badge ${resp === "C" ? "correct" : resp === "E" ? "error" : "pending"}`;
+        b.textContent = offset + i;
+        b.style.fontSize = "0.7em";
+        container.appendChild(b);
       });
     }
 
     function renderHistorico() {
-      const ctx = getCtx();
-      const container = ctx.getElementById("historico");
+      const container = getCtx().getElementById("historico");
       if (!container) return;
       container.innerHTML = "";
-      historico.slice(-12).forEach(resp => {
-        const badge = document.createElement("div");
-        badge.className = `badge ${resp === "C" ? "correct" : "error"}`;
-        badge.style.width = "24px"; badge.style.height = "24px"; badge.style.fontSize = "0.7em";
-        badge.textContent = resp === "C" ? "✔" : "✘";
-        container.appendChild(badge);
+      historico.slice(-10).forEach(resp => {
+        const b = document.createElement("div");
+        b.className = `badge ${resp === "C" ? "correct" : "error"}`;
+        b.style.width = "25px"; b.style.height = "25px"; b.textContent = "";
+        container.appendChild(b);
       });
     }
 
@@ -525,20 +648,11 @@
       return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(seg).padStart(2, '0')}`;
     }
 
-    function reiniciar() { window.location.reload(); }
-
-    document.getElementById('btnToggleTheme').onclick = () => {
-      const b = document.body;
-      const dark = b.getAttribute('data-theme') === 'dark';
-      b.setAttribute('data-theme', dark ? 'light' : 'dark');
-      document.getElementById('btnToggleTheme').textContent = dark ? '☾' : '☀︎';
-    };
+    function reiniciarMesmoNivel() {
+      if (confirm("Zerar progresso atual?")) aplicarInicio();
+    }
 
     vincularBotoes(document);
-    document.addEventListener('keydown', (e) => {
-      const k = e.key.toLowerCase();
-      if (k === 'c') responder('C'); if (k === 'e') responder('E'); if (k === 'p') alternarPausaManual();
-    });
     document.getElementById("ano").textContent = new Date().getFullYear();
   </script>
 </body>
