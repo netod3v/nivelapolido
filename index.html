@@ -403,6 +403,25 @@
         : document;
     }
 
+    // NOVA FUNÇÃO: Atalhos de Teclado
+    // Função de teclado modificada
+    function configurarTeclado(doc) {
+      // Verifica se o 'doc' é o documento da página principal
+      // Se for a janela flutuante, não adiciona o ouvinte de teclado
+      if (doc !== document) return;
+
+      doc.addEventListener('keydown', (event) => {
+        if (event.target.tagName === 'INPUT') return;
+
+        const tecla = event.key.toUpperCase();
+        if (tecla === 'C') {
+          responder('C');
+        } else if (tecla === 'E') {
+          responder('E');
+        }
+      });
+    }
+
     function vincularBotoes(doc) {
       const setupClick = (id, func) => {
         const el = doc.getElementById(id);
@@ -419,6 +438,9 @@
       setupClick("btnFlutuar", togglePiP);
       setupClick("btnPausa", togglePausa);
       setupClick("btnToggleTheme", alternarTema);
+
+      // Chama a configuração do teclado
+      configurarTeclado(doc);
     }
 
     function alternarTema() {
@@ -478,7 +500,6 @@
       const match = inputMeta.match(/^(\d+)[\/\\](\d+)$/);
       if (!match) return alert("Use o formato A/B (ex: 8/10).");
 
-      // Pedir permissão para notificações
       if ("Notification" in window) {
         Notification.requestPermission();
       }
@@ -514,7 +535,11 @@
 
     function responder(tipo) {
       if (!iniciado || nivelado || pausadoManual) return;
-      document.getElementById(tipo === 'C' ? 'somAcerto' : 'somErro').play();
+
+      const somA = document.getElementById('somAcerto');
+      const somE = document.getElementById('somErro');
+      if (tipo === 'C') somA.play(); else somE.play();
+
       respostas.push(tipo);
       if (respostas.length > nivelB) respostas.shift();
       historico.push(tipo);
@@ -524,8 +549,9 @@
       renderRespostas();
       renderHistorico();
 
-      if (tipo === 'E') pausarParaResolucao();
-      else {
+      if (tipo === 'E') {
+        pausarParaResolucao();
+      } else {
         const acertosNaJanela = respostas.filter(r => r === "C").length;
         if (acertosNaJanela >= nivelA) exibirExito();
       }
@@ -534,8 +560,23 @@
     function pausarParaResolucao() {
       pausadoParaResolucao = true;
       const ctx = getCtx();
-      ctx.getElementById("blur-overlay").style.display = "block";
-      ctx.getElementById("overlayConteudo").style.display = "block";
+
+      // VERIFICAÇÃO: Se não estiver no modo PiP, mostra o overlay
+      // Se estiver no PiP (window.documentPictureInPicture.window existe), pula o visual
+      const estaNoPiP = window.documentPictureInPicture && window.documentPictureInPicture.window;
+
+      if (!estaNoPiP) {
+        ctx.getElementById("blur-overlay").style.display = "block";
+        ctx.getElementById("overlayConteudo").style.display = "block";
+      } else {
+        // No PiP, apenas avisamos visualmente de forma discreta ou deixamos o cronômetro rodar a pausa
+        console.log("Erro registrado no PiP: Pausa de correção ativa (sem overlay).");
+
+        // Opcional: Você pode fechar a pausa automaticamente no próximo acerto ou 
+        // criar um botão menor. Mas como você pediu para NÃO aparecer, 
+        // vamos apenas manter o estado de 'pausadoParaResolucao' ativo.
+        // Se quiser que o PiP NUNCA pause o tempo, mude para: pausadoParaResolucao = false;
+      }
     }
 
     function fecharResolucao() {
@@ -552,7 +593,6 @@
       const total = historico.length;
       const aprov = ((acertos / total) * 100).toFixed(1);
 
-      // Notificação nativa do sistema
       if ("Notification" in window && Notification.permission === "granted") {
         new Notification("🔥 NIVELADO!", {
           body: `Aproveitamento: ${aprov}% | Questões: ${total}`,
@@ -560,7 +600,6 @@
         });
       }
 
-      // Atualiza os dados na tela (seja PiP ou Principal)
       doc.getElementById("mainContainer").classList.add("nivelado-sucesso");
       doc.getElementById("tempoTotal").textContent = `⏱️ Estudo: ${formatarTempo(segundosTotais)}`;
       doc.getElementById("totalQuestoes").textContent = `📚 Questões: ${total}`;
@@ -572,7 +611,6 @@
       doc.getElementById("telaExito").style.display = "block";
       doc.getElementById("painelControles").style.display = "none";
 
-      // Se estiver no PiP, garantir que a tela de êxito também apareça na página principal ao fechar
       if (window.documentPictureInPicture && window.documentPictureInPicture.window) {
         const mainDoc = document;
         mainDoc.getElementById("blur-overlay").style.display = "block";
@@ -602,7 +640,6 @@
         document.querySelector('.main-content').appendChild(container);
         vincularBotoes(document);
 
-        // Se nivelou no PiP, garante que ao voltar a tela de sucesso esteja visível
         if (nivelado) {
           document.getElementById("blur-overlay").style.display = "block";
           document.getElementById("telaExito").style.display = "block";
