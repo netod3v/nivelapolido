@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Nivelamento</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="https://fenixconcursosmilitares.com.br/public/assets/images/relogio.png">
+  <style>
+    :root {
+      --bg-color: #0a0a1a;
+      --text-color: #f0f0f0;
+      --card-bg: rgba(30, 30, 60, 0.8);
+      --btn-bg: #4a00e0;
+      --btn-text: #ffffff;
+      --correct: #00c853;
+      --error: #ff1744;
+      --pending: #616161;
+      --accent-color: #ff8f00;
+      --header-bg: #1a0033;
+    }
+
+    [data-theme="light"] {
+      --bg-color: #f5f5ff;
+      --text-color: #1a0033;
+      --card-bg: rgba(255, 255, 255, 0.9);
+      --header-bg: #4a00e0;
+      --accent-color: #ff6d00;
+    }
+
+    body {
+      font-family: 'Montserrat', 'Segoe UI', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, var(--header-bg) 0%, #3a0075 100%);
+      padding: 15px 25px;
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      border-bottom: 2px solid var(--accent-color);
+      flex-shrink: 0;
+    }
+
+    .main-content {
+      flex: 1 0 auto;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      padding: 45px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-sizing: border-box;
+    }
+
+    h1 {
+      font-size: 1.8em;
+      margin-bottom: 10px;
+    }
+
+    #objetivo {
+      margin-bottom: 20px;
+      font-weight: 500;
+      opacity: 0.9;
+    }
+
+    #respostas,
+    #historico {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .controles {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 25px 0;
+    }
+
+    input,
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+      font-size: 1em;
+      font-weight: 700;
+    }
+
+    input {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-color);
+      border: 2px solid rgba(0, 0, 0, 0.349);
+      width: 180px;
+      text-align: center;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    .btn-start {
+      background: var(--accent-color);
+      color: white;
+    }
+
+    .btn-correct {
+      background: var(--correct);
+      color: white;
+      flex: 1;
+      max-width: 150px;
+    }
+
+    .btn-error {
+      background: var(--error);
+      color: white;
+      flex: 1;
+      max-width: 150px;
+    }
+
+    .badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .badge.correct {
+      background: var(--correct);
+    }
+
+    .badge.error {
+      background: var(--error);
+    }
+
+    .badge.pending {
+      background: var(--pending);
+      color: #ccc;
+    }
+
+    #blur-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 50;
+      display: none;
+    }
+
+    #telaExito,
+    #overlayConteudo {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 100;
+      width: 85%;
+      max-width: 450px;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      display: none;
+      box-sizing: border-box;
+      border: 2px solid var(--accent-color);
+      background: var(--header-bg);
+      color: white;
+    }
+
+    .footer {
+      flex-shrink: 0;
+      text-align: center;
+      padding: 15px;
+      font-size: 19px;
+      background: var(--header-bg);
+      color: white;
+      border-top: 1px solid var(--accent-color);
+    }
+
+    @media (max-width: 480px) {
+      .controles {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .btn-correct,
+      .btn-error {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .badge {
+        width: 35px;
+        height: 35px;
+      }
+    }
+
+    #statusNivelamento,
+    .controles,
+    .response-history {
+      display: none;
+    }
+  </style>
+</head>
+
+<body data-theme="light">
+  <div class="header">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <img src="https://fenixconcursosmilitares.com.br/public/assets/images/relogio.png" width="25">
+      <span><strong id="tempo">00:00:00</strong></span>
+    </div>
+    <button id="btnToggleTheme" class="btn-start" style="padding: 5px 12px;">☾</button>
+  </div>
+
+  <div class="main-content">
+    <div class="container" id="mainContainer">
+      <h1 id="tituloNivelamento">Nivelamento</h1>
+
+      <div id="setup">
+        <input type="text" id="inputNivelamento" placeholder="Ex: 4/5" />
+        <br>
+        <button id="botaoIniciar" class="btn-start" onclick="iniciarNivelamento()" style="margin-top: 15px;">Iniciar
+          Nivelamento</button>
+      </div>
+
+      <div id="statusNivelamento">
+        <p id="objetivo"></p>
+        <div id="respostas"></div>
+      </div>
+
+      <div class="controles">
+        <button class="btn-correct" onclick="responder('C')">C (Acerto)</button>
+        <button class="btn-error" onclick="responder('E')">E (Erro)</button>
+      </div>
+
+      <div class="response-history">
+        <hr style="opacity: 0.2; margin: 20px 0;">
+        <h3>Histórico:</h3>
+        <div id="historico"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="blur-overlay"></div>
+
+  <div id="overlayConteudo">
+    <img src="https://fenixconcursosmilitares.com.br/public/assets/images/relogio.png" width="50">
+    <div id="overlayTempo" style="font-size: 2em; margin: 10px 0; color: var(--accent-color);">00:00:00</div>
+    <p>Você ERROU! Assista a resolução.</p>
+    <button id="botaoProxima" class="btn-start" style="width: 100%;">Já vi a resolução</button>
+    <p style="margin-top: 15px; font-size: 0.9em; opacity: 0.8;">Tempo Corrigindo: <span
+        id="valTempoPausado">00:00:00</span></p>
+  </div>
+
+  <div id="telaExito">
+    <h2 style="color: var(--accent-color);">🔥 NIVELADO! 🔥</h2>
+    <div id="statsFinal" style="text-align: left; display: inline-block; margin: 15px 0;">
+      <p id="tempoTotal"></p>
+      <p id="totalQuestoes"></p>
+      <p id="acertosErros"></p>
+      <p id="totalPausa"></p>
+    </div>
+    <button class="btn-start" onclick="reiniciar()" style="width: 100%;">🔁 Novo Nivelamento</button>
+  </div>
+
+  <audio id="somAcerto"
+    src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_b52b00b5f3.mp3?filename=success-fanfare-trumpets-6185.mp3"></audio>
+  <audio id="somErro"
+    src="https://cdn.pixabay.com/download/audio/2022/03/22/audio_7a574ba0ef.mp3?filename=error-126627.mp3"></audio>
+
+  <footer class="footer">
+    <p>© <span id="ano"></span> Feito por: Suzart, SOB EFOMM.</p>
+  </footer>
+
+  <script>
+    let nivelA = 0, nivelB = 0, respostas = [], historico = [];
+    let cronometroInterval = null, segundosTotais = 0, iniciado = false;
+    let pausado = false, tempoPausado = 0, intervaloPausa = null;
+
+    document.getElementById('btnToggleTheme').onclick = () => {
+      const body = document.body;
+      const isDark = body.getAttribute('data-theme') === 'dark';
+      body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('btnToggleTheme').textContent = isDark ? '☾' : '☀︎';
+    };
+
+    function iniciarNivelamento() {
+      const input = document.getElementById("inputNivelamento").value;
+      const match = input.match(/^(\d+)[\/\\](\d+)$/);
+      if (!match) return alert("Use o formato A/B.");
+      nivelA = parseInt(match[1]);
+      nivelB = parseInt(match[2]);
+      if (nivelA > nivelB) return alert("Acertos não podem ser maiores que o total.");
+
+      document.getElementById("setup").style.display = "none";
+      document.getElementById("statusNivelamento").style.display = "block";
+      document.querySelector(".controles").style.display = "flex";
+      document.querySelector(".response-history").style.display = "block";
+      document.getElementById("objetivo").textContent = `Objetivo: ${nivelA} acertos em ${nivelB} questões`;
+
+      respostas = Array(nivelB).fill("-");
+      renderRespostas();
+      iniciado = true;
+      iniciarCronometro();
+    }
+
+    function renderRespostas() {
+      const container = document.getElementById("respostas");
+      container.innerHTML = "";
+      respostas.forEach(resp => {
+        const badge = document.createElement("div");
+        badge.className = `badge ${resp === "C" ? "correct" : resp === "E" ? "error" : "pending"}`;
+        badge.textContent = resp === "-" ? "" : resp;
+        container.appendChild(badge);
+      });
+    }
+
+    function renderHistorico() {
+      const container = document.getElementById("historico");
+      container.innerHTML = "";
+      historico.slice(-15).forEach(resp => {
+        const badge = document.createElement("div");
+        badge.className = `badge ${resp === "C" ? "correct" : "error"}`;
+        badge.style.width = "30px"; badge.style.height = "30px"; badge.style.fontSize = "0.8em";
+        badge.textContent = resp === "C" ? "✔" : "✘";
+        container.appendChild(badge);
+      });
+    }
+
+    function responder(tipo) {
+      if (!iniciado || pausado) return;
+      document.getElementById(tipo === 'C' ? 'somAcerto' : 'somErro').play();
+
+      respostas.push(tipo);
+      if (respostas.length > nivelB) respostas.shift();
+      historico.push(tipo);
+
+      renderRespostas();
+      renderHistorico();
+
+      if (tipo === 'E') {
+        pausarParaResolucao();
+      } else {
+        const acertos = respostas.filter(r => r === "C").length;
+        if (acertos >= nivelA) exibirExito();
+      }
+    }
+
+    function pausarParaResolucao() {
+      pausado = true;
+      clearInterval(cronometroInterval);
+      document.getElementById("blur-overlay").style.display = "block";
+      document.getElementById("overlayConteudo").style.display = "block";
+      document.getElementById("overlayTempo").textContent = document.getElementById("tempo").textContent;
+      intervaloPausa = setInterval(() => {
+        tempoPausado++;
+        document.getElementById("valTempoPausado").textContent = formatarTempo(tempoPausado);
+      }, 1000);
+    }
+
+    document.getElementById("botaoProxima").onclick = () => {
+      clearInterval(intervaloPausa);
+      document.getElementById("overlayConteudo").style.display = "none";
+      document.getElementById("blur-overlay").style.display = "none";
+      iniciarCronometro();
+      pausado = false;
+    };
+
+    function iniciarCronometro() {
+      cronometroInterval = setInterval(() => {
+        segundosTotais++;
+        document.getElementById("tempo").textContent = formatarTempo(segundosTotais);
+      }, 1000);
+    }
+
+    function exibirExito() {
+      clearInterval(cronometroInterval);
+      document.getElementById("tempoTotal").textContent = `⏱️ Tempo de estudo: ${formatarTempo(segundosTotais)}`;
+      document.getElementById("totalQuestoes").textContent = `📚 Total de questões: ${historico.length}`;
+      document.getElementById("acertosErros").textContent = `✅ Acertos: ${historico.filter(r => r === 'C').length} | ❌ Erros: ${historico.filter(r => r === 'E').length}`;
+      document.getElementById("totalPausa").textContent = `⏸️ Tempo de correção: ${formatarTempo(tempoPausado)}`;
+      document.getElementById("blur-overlay").style.display = "block";
+      document.getElementById("telaExito").style.display = "block";
+    }
+
+    function reiniciar() { window.location.reload(); }
+
+    function formatarTempo(s) {
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const seg = s % 60;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(seg).padStart(2, '0')}`;
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'c') responder('C');
+      if (e.key.toLowerCase() === 'e') responder('E');
+    });
+    document.getElementById("ano").textContent = new Date().getFullYear();
+  </script>
+</body>
+
+</html>
